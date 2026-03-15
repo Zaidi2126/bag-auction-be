@@ -34,7 +34,7 @@ PythonAnywhere’s free tier allows outbound SMTP, so Gmail OTP emails work. ASG
    ```
 5. **Create a virtualenv and install dependencies:**
    ```bash
-   mkvirtualenv bag-auction-be --python=python3.11
+   mkvirtualenv bag-auction-be --python=python3.12
    pip install -r requirements.txt
    ```
    (If `mkvirtualenv` isn’t found, use **virtualenv** from the PythonAnywhere dashboard first, then `workon bag-auction-be` and run `pip install -r requirements.txt` in the project directory.)
