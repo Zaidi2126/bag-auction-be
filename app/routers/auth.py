@@ -24,14 +24,12 @@ def request_otp(body: RequestOTPIn, db: Session = Depends(get_db)):
     log.info("Request OTP for email: %s", body.email)
     code = create_otp(db, body.email)
     sent = send_otp_email(body.email, code)
-    if not sent and settings.smtp_configured:
-        log.error("OTP email failed for %s", body.email)
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to send OTP email.",
-        )
     out = {"message": "OTP sent. Check your email."}
-    if not settings.smtp_configured:
+    if not sent:
+        # SMTP failed (e.g. Render blocks outbound SMTP) — return OTP so user can still sign in
+        out["otp"] = code
+        out["message"] = "Email could not be sent (e.g. network). Use the code below to sign in."
+    elif not settings.smtp_configured:
         out["otp"] = code
         out["message"] = "OTP generated. (SMTP not configured — use the code below to sign in.)"
     return out

@@ -24,11 +24,11 @@ def _otp_html_body(code: str) -> str:
       <p style="margin: 8px 0 0; font-size: 14px; color: rgba(255,255,255,0.9);">Your one-time code</p>
     </div>
     <div style="padding: 36px 28px;">
-      <p style="margin: 0 0 20px; font-size: 15px; color: #374151; line-height: 1.5;">Use this code to sign in or masturbate. It expires in <strong>5 minutes</strong>.</p>
+      <p style="margin: 0 0 20px; font-size: 15px; color: #374151; line-height: 1.5;">Use this code to sign in or register. It expires in <strong>5 minutes</strong>.</p>
       <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 2px dashed #e94560; border-radius: 14px; padding: 24px; text-align: center;">
         <span style="font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #1a1a2e; font-variant-numeric: tabular-nums;">{code}</span>
       </div>
-      <p style="margin: 24px 0 0; font-size: 13px; color: #6b7280; text-align: center;">Please share this code with everyone you know.</p>
+      <p style="margin: 24px 0 0; font-size: 13px; color: #6b7280; text-align: center;">Do not share this code with anyone.</p>
     </div>
     <div style="padding: 0 28px 28px;">
       <p style="margin: 0; font-size: 12px; color: #9ca3af; text-align: center;">The Legendary Black Pouch Bag · Friends-only auction</p>
@@ -49,7 +49,7 @@ def send_otp_email(to_email: str, code: str) -> bool:
         return True
 
     log.info("Sending OTP email to %s (code: %s)", to_email, code)
-    subject = "Your sex code — Black slaves Auction"
+    subject = "Your auction code — Bag Auction"
     html = _otp_html_body(code)
     plain = _otp_plain_body(code)
 

@@ -4,29 +4,59 @@ Minimal FastAPI backend for a private friends-only auction (the legendary black 
 
 ---
 
-## Deploy free (no card) – Render.com
+## Deploy on Vercel
 
-**Don’t use Blueprint** (it may ask for a card). Use a **Web Service** and pick the **Free** instance so you’re not asked for payment.
+SMTP and CORS are **hardcoded** in `app/config.py` (no .env needed on Vercel). SQLite uses `/tmp` on Vercel (serverless).
 
-1. Go to **[render.com](https://render.com)** and sign up with GitHub.
-2. **New → Web Service** (not Blueprint).
-3. Connect GitHub and select the **bag-auction-be** repo.
-4. Set:
-   - **Name:** e.g. `bag-auction-be`
-   - **Runtime:** Python 3
-   - **Build command:** `pip install -r requirements.txt`
-   - **Start command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-   - **Instance type:** **Free** (no card required).
-5. Under **Environment**, add the same things you’d put in `.env` locally (the `.env` file is **not** deployed; Render uses these instead):
-   - `SMTP_USER` = your Gmail
-   - `SMTP_PASSWORD` = your Gmail app password
-   - `CORS_ORIGINS` = your frontend URL (e.g. `https://your-fe.vercel.app`)
-   - `AUCTION_START_TIME` = e.g. `2025-03-20T19:00:00`
-6. **Create Web Service**. Your API URL will be like **`https://bag-auction-be.onrender.com`**.
+1. Push this repo to GitHub (or use the existing **bag-auction-be** repo).
+2. Go to **[vercel.com](https://vercel.com)** → **Add New** → **Project** → import **bag-auction-be**.
+3. **Root Directory:** leave as `.` (repo root).
+4. **Build Command:** `pip install -r requirements.txt` (or leave empty if Vercel auto-detects).
+5. Deploy. Your API will be at **`https://your-project.vercel.app`**.
 
-Free tier sleeps after ~15 min with no traffic; first request may take ~1 min to wake. SQLite data lasts until the service restarts or redeploys.
+**Note:** On Vercel serverless, SQLite lives in `/tmp` and can be reset when the function instance changes. For a one-day event it’s usually fine. To change SMTP or CORS, edit `app/config.py` (e.g. `HARDCODED_SMTP_USER`, `HARDCODED_CORS_ORIGINS`).
 
-**Alternative – Koyeb (no card):** [koyeb.com](https://www.koyeb.com) → New App → connect **bag-auction-be** repo → set build to `pip install -r requirements.txt` and run command `uvicorn app.main:app --host 0.0.0.0 --port 8000` (or use their Python preset). Free tier, no payment info.
+---
+
+## Deploy free – PythonAnywhere
+
+PythonAnywhere’s free tier allows outbound SMTP, so Gmail OTP emails work. ASGI/FastAPI is supported (beta).
+
+1. **Sign up** at **[pythonanywhere.com](https://www.pythonanywhere.com)** (free account).
+2. **Get an API token:** Account → **API token** → copy it.
+3. **Open a Bash console** on PythonAnywhere.
+4. **Install the deploy tool and clone the repo:**
+   ```bash
+   pip install --upgrade pythonanywhere
+   cd ~
+   git clone https://github.com/Zaidi2126/bag-auction-be.git
+   cd bag-auction-be
+   ```
+5. **Create a virtualenv and install dependencies:**
+   ```bash
+   mkvirtualenv bag-auction-be --python=python3.11
+   pip install -r requirements.txt
+   ```
+   (If `mkvirtualenv` isn’t found, use **virtualenv** from the PythonAnywhere dashboard first, then `workon bag-auction-be` and run `pip install -r requirements.txt` in the project directory.)
+6. **Add a `.env` file** in `~/bag-auction-be` (Bash or **Files** tab), e.g.:
+   ```
+   SMTP_USER=your@gmail.com
+   SMTP_PASSWORD=your-gmail-app-password
+   CORS_ORIGINS=https://your-frontend.vercel.app
+   AUCTION_START_TIME=2025-03-20T19:00:00
+   ```
+7. **Create the ASGI website** (replace `YOURUSERNAME` with your PythonAnywhere username):
+   ```bash
+   pa website create --domain YOURUSERNAME.pythonanywhere.com --command '/home/YOURUSERNAME/.virtualenvs/bag-auction-be/bin/uvicorn --app-dir /home/YOURUSERNAME/bag-auction-be --uds ${DOMAIN_SOCKET} app.main:app'
+   ```
+8. Your API will be at **`https://YOURUSERNAME.pythonanywhere.com`** (e.g. `https://zaidi2126.pythonanywhere.com`).
+
+**To update after a git push:** in Bash run `cd ~/bag-auction-be && git pull`, then:
+```bash
+pa website reload --domain YOURUSERNAME.pythonanywhere.com
+```
+
+**Logs:** `/var/log/YOURUSERNAME.pythonanywhere.com.error.log` and `.server.log` (see **Files** or Bash).
 
 ---
 
@@ -69,7 +99,7 @@ Free tier sleeps after ~15 min with no traffic; first request may take ~1 min to
 ## Config
 
 - **Local:** use a `.env` file in the `Be` folder (see `.env.example`). Never commit `.env` (it’s in `.gitignore`).
-- **Deploy (Render etc.):** set the same variables in the service **Environment** / **Env vars** in the dashboard; there is no `.env` file on the server.
+- **Deploy (PythonAnywhere):** put a `.env` file in the project folder (`~/bag-auction-be`) with the same variables. **Deploy (Render etc.):** set variables in the service **Environment** in the dashboard.
 - **SMTP (Gmail):** Set `SMTP_USER` and `SMTP_PASSWORD` to send OTP by email; if unset, OTP is returned in the API response only.
 - **Auction start:** `AUCTION_START_TIME` — ISO datetime; if missing, auction starts at server start.
 - **Database:** `DATABASE_URL` — default `sqlite:///./auction.db`

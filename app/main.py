@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import settings
 from app.database import init_db, SessionLocal
 
 logging.basicConfig(
@@ -38,7 +39,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-from app.config import settings
 _origins = [
     "http://localhost:3000", "http://127.0.0.1:3000",
     "http://localhost:5173", "http://127.0.0.1:5173",
