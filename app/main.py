@@ -1,9 +1,17 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import init_db, SessionLocal
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
+log = logging.getLogger("auction")
 from app.seed import seed_auction_if_empty
 from app.routers import auth, auction
 
@@ -16,6 +24,11 @@ async def lifespan(app: FastAPI):
         seed_auction_if_empty(db)
     finally:
         db.close()
+    from app.config import settings
+    if settings.smtp_configured:
+        log.info("SMTP configured: sending OTP via email (%s)", settings.smtp_user)
+    else:
+        log.warning("SMTP not configured (set SMTP_USER in .env). OTP will be returned in API response.")
     yield
     # no cleanup needed for sqlite
 

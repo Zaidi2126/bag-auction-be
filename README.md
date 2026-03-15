@@ -40,7 +40,7 @@ Minimal FastAPI backend for a private friends-only auction (the legendary black 
 
 ## Config (.env)
 
-- **SMTP** (optional): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` — if missing, OTP is logged to terminal.
+- **SMTP (Gmail)**: Backend uses Gmail SMTP by default. Set `SMTP_USER=your@gmail.com` to send OTP emails; if unset, OTP is printed to terminal only.
 - **Auction start**: `AUCTION_START_TIME` — ISO datetime; if missing, auction starts at server start.
 - **Database**: `DATABASE_URL` — default `sqlite:///./auction.db`
 - **Secret**: `SECRET_KEY` — for session tokens (default dev key if missing)

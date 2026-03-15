@@ -31,9 +31,18 @@ All request bodies are **JSON**. Send **`Content-Type: application/json`** for P
 
 **Success (200):**
 
+When SMTP is configured (email is sent):
 ```json
 {
-  "message": "OTP sent. Check your email (or terminal if SMTP is not configured)."
+  "message": "OTP sent. Check your email."
+}
+```
+
+When SMTP is not configured (dev): the API returns the OTP so the frontend can show it:
+```json
+{
+  "message": "OTP generated. (SMTP not configured — use the code below to sign in.)",
+  "otp": "123456"
 }
 ```
 
@@ -42,7 +51,7 @@ All request bodies are **JSON**. Send **`Content-Type: application/json`** for P
 - **422** – Validation error (e.g. invalid email shape). Body has `detail` array.
 - **500** – SMTP is configured but sending failed. Body: `{ "detail": "Failed to send OTP email." }`
 
-**What to do in FE:** Show “Check your email” (or “Check the terminal if dev”), then show the OTP input and “Verify” button.
+**What to do in FE:** If the response has `otp`, show it so the user can sign in (e.g. “Your code: 123456”). Otherwise show “Check your email” and the OTP input + “Verify” button.
 
 ---
 

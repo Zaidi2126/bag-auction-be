@@ -1,7 +1,8 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from app.auction_logic import (
@@ -15,7 +16,7 @@ from app.auction_logic import (
 )
 from app.database import get_db
 from app.deps import get_current_user
-from app.models import Auction, User
+from app.models import Auction, Bid, User
 from app.schemas import (
     ALLOWED_INCREMENT,
     AuctionMeOut,
@@ -71,6 +72,24 @@ def get_auction_state(db: Session = Depends(get_db)):
     auction = get_single_auction(db)
     if not auction:
         raise HTTPException(status_code=404, detail="No auction found.")
+    return _auction_state(auction, db)
+
+
+@router.post("/reset-for-testing", response_model=AuctionStateOut)
+def reset_auction_for_testing(db: Session = Depends(get_db)):
+    """Dev only: reset the auction to active with 30 minutes from now. Use for testing."""
+    auction = get_single_auction(db)
+    if not auction:
+        raise HTTPException(status_code=404, detail="No auction found.")
+    now = datetime.now(timezone.utc)
+    auction.start_time = now
+    auction.end_time = now + timedelta(minutes=30)
+    auction.status = "active"
+    auction.current_highest_bid = 0.0
+    auction.current_highest_bidder_id = None
+    db.execute(delete(Bid).where(Bid.auction_id == auction.id))
+    db.commit()
+    db.refresh(auction)
     return _auction_state(auction, db)
 
 
