@@ -39,13 +39,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Allow all origins for now (set allow_credentials=False when using "*")
+# Allow all origins (regex matches any; credentials=True so Bearer token works)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=[],
+    allow_origin_regex=r"^https?://.*",
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 app.include_router(auth.router)
