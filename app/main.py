@@ -24,7 +24,6 @@ async def lifespan(app: FastAPI):
         seed_auction_if_empty(db)
     finally:
         db.close()
-    from app.config import settings
     if settings.smtp_configured:
         log.info("SMTP configured: sending OTP via email (%s)", settings.smtp_user)
     else:
@@ -39,9 +38,16 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+from app.config import settings
+_origins = [
+    "http://localhost:3000", "http://127.0.0.1:3000",
+    "http://localhost:5173", "http://127.0.0.1:5173",
+]
+if settings.cors_origins:
+    _origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     smtp_password: Optional[str] = None  # defaults to GMAIL_APP_PASSWORD if unset
     smtp_from: Optional[str] = None
     auction_start_time: Optional[str] = None  # ISO format
+    cors_origins: Optional[str] = None  # comma-separated, e.g. https://my-fe.vercel.app
 
     @property
     def smtp_configured(self) -> bool:

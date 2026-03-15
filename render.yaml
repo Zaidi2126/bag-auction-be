@@ -1,0 +1,11 @@
+# Render Blueprint: 1-click deploy from GitHub
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: bag-auction-be
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"

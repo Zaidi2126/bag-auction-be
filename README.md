@@ -2,6 +2,26 @@
 
 Minimal FastAPI backend for a private friends-only auction (the legendary black pouch bag). Email OTP auth, single auction, fixed bid increments, 5s cooldown, 30 min duration.
 
+---
+
+## Deploy free (1-click) – Render.com
+
+**Best for:** One-day event, ~36k hits. 100% free tier (no request limit; 750 instance hours/month).
+
+1. Go to **[render.com](https://render.com)** and sign up (GitHub).
+2. **New → Blueprint**. Connect your GitHub and select the **bag-auction-be** repo.
+3. Render will read `render.yaml` and create the web service. Click **Apply**.
+4. In the service **Environment** tab, add env vars (optional):
+   - `SMTP_USER` = your Gmail (to send OTP by email)
+   - `SMTP_PASSWORD` = your Gmail app password
+   - `CORS_ORIGINS` = your frontend URL, e.g. `https://your-fe.vercel.app` (so the FE can call the API)
+   - `AUCTION_START_TIME` = e.g. `2025-03-20T19:00:00` (ISO)
+5. Deploy. Your API URL will be like **`https://bag-auction-be.onrender.com`**.
+
+**Note:** Free tier sleeps after ~15 min with no traffic (wakes in ~1 min on first request). For a single busy day, traffic keeps it awake. SQLite data lasts until the service is restarted or redeployed.
+
+---
+
 ## Local run (minimal setup)
 
 1. **Create a virtualenv and install dependencies**
