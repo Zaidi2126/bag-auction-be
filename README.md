@@ -4,21 +4,29 @@ Minimal FastAPI backend for a private friends-only auction (the legendary black 
 
 ---
 
-## Deploy free (1-click) – Render.com
+## Deploy free (no card) – Render.com
 
-**Best for:** One-day event, ~36k hits. 100% free tier (no request limit; 750 instance hours/month).
+**Don’t use Blueprint** (it may ask for a card). Use a **Web Service** and pick the **Free** instance so you’re not asked for payment.
 
-1. Go to **[render.com](https://render.com)** and sign up (GitHub).
-2. **New → Blueprint**. Connect your GitHub and select the **bag-auction-be** repo.
-3. Render will read `render.yaml` and create the web service. Click **Apply**.
-4. In the service **Environment** tab, add env vars (optional):
-   - `SMTP_USER` = your Gmail (to send OTP by email)
+1. Go to **[render.com](https://render.com)** and sign up with GitHub.
+2. **New → Web Service** (not Blueprint).
+3. Connect GitHub and select the **bag-auction-be** repo.
+4. Set:
+   - **Name:** e.g. `bag-auction-be`
+   - **Runtime:** Python 3
+   - **Build command:** `pip install -r requirements.txt`
+   - **Start command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Instance type:** **Free** (no card required).
+5. Under **Environment**, add the same things you’d put in `.env` locally (the `.env` file is **not** deployed; Render uses these instead):
+   - `SMTP_USER` = your Gmail
    - `SMTP_PASSWORD` = your Gmail app password
-   - `CORS_ORIGINS` = your frontend URL, e.g. `https://your-fe.vercel.app` (so the FE can call the API)
-   - `AUCTION_START_TIME` = e.g. `2025-03-20T19:00:00` (ISO)
-5. Deploy. Your API URL will be like **`https://bag-auction-be.onrender.com`**.
+   - `CORS_ORIGINS` = your frontend URL (e.g. `https://your-fe.vercel.app`)
+   - `AUCTION_START_TIME` = e.g. `2025-03-20T19:00:00`
+6. **Create Web Service**. Your API URL will be like **`https://bag-auction-be.onrender.com`**.
 
-**Note:** Free tier sleeps after ~15 min with no traffic (wakes in ~1 min on first request). For a single busy day, traffic keeps it awake. SQLite data lasts until the service is restarted or redeployed.
+Free tier sleeps after ~15 min with no traffic; first request may take ~1 min to wake. SQLite data lasts until the service restarts or redeploys.
+
+**Alternative – Koyeb (no card):** [koyeb.com](https://www.koyeb.com) → New App → connect **bag-auction-be** repo → set build to `pip install -r requirements.txt` and run command `uvicorn app.main:app --host 0.0.0.0 --port 8000` (or use their Python preset). Free tier, no payment info.
 
 ---
 
@@ -58,12 +66,15 @@ Minimal FastAPI backend for a private friends-only auction (the legendary black 
 - `POST /auction/bid` — body: `{"increment": 5}` — auth: `Authorization: Bearer <token>`
 - `GET /auction/me` — your user, highest-bidder status, your highest bid, cooldown — auth required
 
-## Config (.env)
+## Config
 
-- **SMTP (Gmail)**: Backend uses Gmail SMTP by default. Set `SMTP_USER=your@gmail.com` to send OTP emails; if unset, OTP is printed to terminal only.
-- **Auction start**: `AUCTION_START_TIME` — ISO datetime; if missing, auction starts at server start.
-- **Database**: `DATABASE_URL` — default `sqlite:///./auction.db`
-- **Secret**: `SECRET_KEY` — for session tokens (default dev key if missing)
+- **Local:** use a `.env` file in the `Be` folder (see `.env.example`). Never commit `.env` (it’s in `.gitignore`).
+- **Deploy (Render etc.):** set the same variables in the service **Environment** / **Env vars** in the dashboard; there is no `.env` file on the server.
+- **SMTP (Gmail):** Set `SMTP_USER` and `SMTP_PASSWORD` to send OTP by email; if unset, OTP is returned in the API response only.
+- **Auction start:** `AUCTION_START_TIME` — ISO datetime; if missing, auction starts at server start.
+- **Database:** `DATABASE_URL` — default `sqlite:///./auction.db`
+- **Secret:** `SECRET_KEY` — for session tokens (default dev key if missing)
+- **CORS:** `CORS_ORIGINS` — comma-separated frontend URLs (only needed when deployed and called from a different origin)
 
 ## Bid rules
 
